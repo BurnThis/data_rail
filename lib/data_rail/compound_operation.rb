@@ -8,11 +8,31 @@ require 'data_rail/compound_operation/component_accessor'
 require 'pry'
 
 module DataRail
+
   module CompoundOperation
     include TSort
 
     def self.included(base)
       base.extend ClassMethods
+    end
+
+    class Phase
+
+      attr_reader :operations
+
+      def initialize(operations)
+        @operations = operations
+      end
+
+      def call_on_result(result)
+        operations.map { |o| o.call_on_result(result) }
+      end
+    end
+
+    class NilInput
+      def self.new(object)
+        object
+      end
     end
 
     module ClassMethods
@@ -59,9 +79,10 @@ module DataRail
     end
 
     def call(result)
+      result = coerce_result(result)
       each_component do |component|
         component_result = component.call_on_result(result)
-        break unless component_result.success?
+        break if not component_result.success?
       end
 
       result
@@ -75,7 +96,27 @@ module DataRail
       required_components_for(component).each(&block)
     end
 
+    def input_class
+      @input_class || NilInput
+    end
+
     private
+
+    #def phases
+    #  strongly_connected_components.map { |components| Phase.new(components) }
+    #end
+
+    #def each_phase(&block)
+    #  phases.each(&block)
+    #end
+
+    def coerce_result(result)
+      if result.kind_of? input_class
+        result
+      else
+        input_class.new(result)
+      end
+    end
 
     def required_components_for(component)
       component.required_component_names.map { |name| get_component(name) }.compact.uniq

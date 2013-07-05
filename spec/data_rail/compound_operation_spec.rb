@@ -36,6 +36,28 @@ module DataRail
     end
   end
 
+  class FailureThenSuccessOperation
+    def self.new
+      MockOperation.new [FailureResult.new, SuccessResult.new]
+    end
+  end
+
+  class MockOperation
+    attr_reader :queue
+
+    def initialize(queue = [])
+      @queue = queue
+    end
+
+    def <<(result)
+      queue << result
+    end
+
+    def call
+      queue.shift
+    end
+  end
+
   class NilResult
 
     def success?
@@ -93,9 +115,12 @@ module DataRail
   class BillOperation
     include CompoundOperation
 
-    #input_class BillResult
-
     components :total, :tax, :tip, :subtotal
+
+    def input_class
+      BillResult
+    end
+
   end
 
   describe CompoundOperation do
@@ -138,10 +163,23 @@ module DataRail
       it { should be_executed }
 
       context 'when an intermediate operation fails' do
-        let(:tax) { FailureOperation.new }
+        let(:tax) { MockOperation.new [FailureResult.new, 5] }
 
         it { should_not be_success }
         it { should_not be_executed }
+
+        it { should be_executed :tax }
+        # should execute all the operations in a phase
+        #it { should be_success :tip }
+
+        context 'when the intermediate operation success on the 2nd try' do
+          before do
+            operation.call(result)
+          end
+
+          it { should be_success }
+          it { should be_executed }
+        end
       end
     end
 
