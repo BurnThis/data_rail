@@ -23,10 +23,16 @@ module DataRail
       end
 
       def required_component_names
-        input_names
+        [*input_names , *preceeding_component_names].uniq
       end
 
       private
+
+      attr_reader :options
+
+      def preceeding_component_names
+        options.fetch(:after) { [] }
+      end
 
       def input_names
         parameter_names(object, :call)
