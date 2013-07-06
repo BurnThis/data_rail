@@ -81,6 +81,7 @@ module DataRail
     def call(result)
       result = coerce_result(result)
       each_component do |component|
+        next if result.send(:get_component, component.name).success?
         component_result = component.call_on_result(result)
         break if not component_result.success?
       end

@@ -163,6 +163,22 @@ module DataRail
       it { should be_executed }
 
       context 'when an intermediate operation fails' do
+
+        class SingleSubtotalOperation
+
+          def initialize(*args)
+            super
+            @count = 0
+          end
+
+          def call(prices)
+            raise 'Can only call once' if @count > 0
+            prices.inject :+
+            @count += 1
+          end
+
+        end
+
         let(:tax) { MockOperation.new [FailureResult.new, 5] }
 
         it { should_not be_success }
@@ -172,7 +188,9 @@ module DataRail
         # should execute all the operations in a phase
         #it { should be_success :tip }
 
-        context 'when the intermediate operation success on the 2nd try' do
+        context 'when the intermediate operation succeeds on the 2nd try' do
+          let(:subtotal) { SingleSubtotalOperation.new }
+
           before do
             operation.call(result)
           end
@@ -180,6 +198,7 @@ module DataRail
           it { should be_success }
           it { should be_executed }
         end
+
       end
     end
 
