@@ -83,6 +83,11 @@ module DataRail
       each_component do |component|
         next if result.send(:get_component, component.name).success?
         component_result = component.call_on_result(result)
+
+        components_directly_dependent_on(component).each do |direct_component|
+          result.send :set_component, direct_component.name, nil
+        end
+
         break if not component_result.success?
       end
 
@@ -117,6 +122,10 @@ module DataRail
       else
         input_class.new(result)
       end
+    end
+
+    def components_directly_dependent_on(component)
+      components.select { |c| c.requires? component }
     end
 
     def required_components_for(component)

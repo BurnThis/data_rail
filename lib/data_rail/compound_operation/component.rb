@@ -22,6 +22,10 @@ module DataRail
         CompoundResult::Component.new(result_component, name)
       end
 
+      def requires?(component)
+        required_component_names.include? component.name
+      end
+
       def required_component_names
         [*input_names , *preceeding_component_names].uniq
       end

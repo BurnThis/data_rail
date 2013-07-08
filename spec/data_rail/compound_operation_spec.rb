@@ -2,27 +2,13 @@ require 'data_rail/compound_operation'
 require 'data_rail/compound_result'
 require 'hashie/mash'
 
+
+require_relative '../support/failure_result'
+require_relative '../support/success_result'
+require_relative '../support/nil_result'
+require_relative '../support/mock_operation'
+
 module DataRail
-
-  class SuccessResult < Hashie::Mash
-    def success?
-      true
-    end
-
-    def executed?
-      true
-    end
-  end
-
-  class FailureResult < Hashie::Mash
-    def success?
-      false
-    end
-
-    def executed?
-      true
-    end
-  end
 
   class SuccessOperation
     def call
@@ -34,40 +20,6 @@ module DataRail
     def call
       FailureResult.new
     end
-  end
-
-  class FailureThenSuccessOperation
-    def self.new
-      MockOperation.new [FailureResult.new, SuccessResult.new]
-    end
-  end
-
-  class MockOperation
-    attr_reader :queue
-
-    def initialize(queue = [])
-      @queue = queue
-    end
-
-    def <<(result)
-      queue << result
-    end
-
-    def call
-      queue.shift
-    end
-  end
-
-  class NilResult
-
-    def success?
-      false
-    end
-
-    def executed?
-      false
-    end
-
   end
 
   class SimulatedBookingResult
@@ -85,7 +37,7 @@ module DataRail
   class BillResult
     include CompoundResult
 
-    components :prices, :subtotal, :tax, :tip, :total
+    components :prices, :subtotal, :tax, :tip, :total, :tax_rate, :tip_rate
   end
 
   class SubtotalOperation
@@ -95,14 +47,14 @@ module DataRail
   end
 
   class TaxOperation
-    def call(subtotal)
-      subtotal * 0.05
+    def call(subtotal, tax_rate)
+      subtotal * tax_rate
     end
   end
 
   class TipOperation
-    def call(subtotal)
-      subtotal * 0.15
+    def call(subtotal, tip_rate)
+      subtotal * tip_rate
     end
   end
 
@@ -156,29 +108,24 @@ module DataRail
       let(:total) { TotalOperation.new }
 
       let(:operation) { BillOperation.new(subtotal: subtotal, tax: tax, tip: tip, total: total) }
-      let(:result) { BillResult.new(prices: [50, 25, 25]) }
+      let(:result) { BillResult.new(prices: [50, 25, 25], tax_rate: 0.05, tip_rate: 0.15) }
 
       its(:total) { should eq 120 }
       it { should be_success }
       it { should be_executed }
 
-      context 'when an intermediate operation fails' do
+      context 'when a value with downstream dependencies changes' do
+        let(:tax) { MockOperation.new [5, 100] }
 
-        class SingleSubtotalOperation
-
-          def initialize(*args)
-            super
-            @count = 0
-          end
-
-          def call(prices)
-            raise 'Can only call once' if @count > 0
-            prices.inject :+
-            @count += 1
-          end
-
+        before do
+          result.tax = nil
+          operation.call(result)
         end
 
+        its(:total) { should eq 215 }
+      end
+
+      context 'when an intermediate operation fails' do
         let(:tax) { MockOperation.new [FailureResult.new, 5] }
 
         it { should_not be_success }
@@ -186,17 +133,17 @@ module DataRail
 
         it { should be_executed :tax }
         # should execute all the operations in a phase
-        #it { should be_success :tip }
+        # it { should be_success :tip }
 
         context 'when the intermediate operation succeeds on the 2nd try' do
-          let(:subtotal) { SingleSubtotalOperation.new }
-
           before do
             operation.call(result)
           end
 
           it { should be_success }
           it { should be_executed }
+
+          its(:total) { should eq 120 }
         end
 
       end
