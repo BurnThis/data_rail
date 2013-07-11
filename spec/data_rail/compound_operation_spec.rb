@@ -34,12 +34,6 @@ module DataRail
     components :order, :charge, :roster
   end
 
-  class BillResult
-    include CompoundResult
-
-    components :prices, :subtotal, :tax, :tip, :total, :tax_rate, :tip_rate
-  end
-
   class SubtotalOperation
     def call(prices)
       prices.inject :+
@@ -68,11 +62,6 @@ module DataRail
     include CompoundOperation
 
     components :total, :tax, :tip, :subtotal
-
-    def input_class
-      BillResult
-    end
-
   end
 
   describe CompoundOperation do
@@ -108,7 +97,7 @@ module DataRail
       let(:total) { TotalOperation.new }
 
       let(:operation) { BillOperation.new(subtotal: subtotal, tax: tax, tip: tip, total: total) }
-      let(:result) { BillResult.new(prices: [50, 25, 25], tax_rate: 0.05, tip_rate: 0.15) }
+      let(:result) { Hashie::Mash.new(prices: [50, 25, 25], tax_rate: 0.05, tip_rate: 0.15) }
 
       its(:total) { should eq 120 }
       it { should be_success }
@@ -147,6 +136,31 @@ module DataRail
         end
 
       end
+
+      #context 'when using a block for an operation' do
+      #  class BlockOperation
+      #    include CompoundOperation
+      #
+      #    component :math do |a, b|
+      #      a + b
+      #    end
+      #  end
+      #
+      #  class BlockResult
+      #    include CompoundResult
+      #    component :a, :b, :math
+      #  end
+      #
+      #  let(:operation) { BlockOperation.new }
+      #  let(:result) { BlockResult.new(a: 3, b: 5) }
+      #  subject { result }
+      #  before do
+      #    operation.call(result)
+      #  end
+      #
+      #  its(:math) { should eq 8 }
+      #end
+
     end
 
   end

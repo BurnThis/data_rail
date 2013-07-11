@@ -81,14 +81,14 @@ module DataRail
     def call(result)
       result = coerce_result(result)
       each_component do |component|
-        next if result.send(:get_component, component.name).success?
+        next if successful_result?(result)
         component_result = component.call_on_result(result)
 
         components_directly_dependent_on(component).each do |direct_component|
-          result.send :set_component, direct_component.name, nil
+          result.public_send "#{direct_component.name}=", nil
         end
 
-        break if not component_result.success?
+        break if not successful_result?(component_result)
       end
 
       result
@@ -108,6 +108,14 @@ module DataRail
 
     private
 
+    def successful_result?(result)
+      if result.respond_to? :success?
+        result.success?
+      else
+        true
+      end
+    end
+
     #def phases
     #  strongly_connected_components.map { |components| Phase.new(components) }
     #end
@@ -117,11 +125,12 @@ module DataRail
     #end
 
     def coerce_result(result)
-      if result.kind_of? input_class
-        result
-      else
-        input_class.new(result)
-      end
+      result
+      #if result.kind_of? input_class
+      #  result
+      #else
+      #  input_class.new(result)
+      #end
     end
 
     def components_directly_dependent_on(component)
