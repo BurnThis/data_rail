@@ -37,9 +37,9 @@ module DataRail
         end
       end
 
-      def component(name, options = {})
+      def component(name, options = {}, &default)
         component_accessor name
-        accessor = ComponentAccessor.new(name.to_sym, options)
+        accessor = ComponentAccessor.new(name.to_sym, options, &default)
         component_accessors[accessor.name] = accessor
       end
 
@@ -121,9 +121,20 @@ module DataRail
     end
 
     def new_component_from_accessor(accessor)
-      Component.new(public_send(accessor.name),
-                    accessor.name,
-                    accessor.options)
+      underlying_component = public_send(accessor.name)
+      if underlying_component
+        Component.new(public_send(accessor.name),
+                      accessor.name,
+                      accessor.options)
+      elsif accessor.has_default?
+        Component.new(accessor.default,
+                      accessor.name,
+                      accessor.options)
+      end
+    end
+
+    def component_accessors_with_defaults
+      component_accessors.select { |a| a.has_default? }
     end
 
     def component_accessors

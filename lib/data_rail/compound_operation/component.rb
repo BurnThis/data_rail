@@ -39,7 +39,11 @@ module DataRail
       end
 
       def input_names
-        parameter_pairs(object).map { |(type, name)| name if type == :req }.compact
+        parameter_pairs(object).map { |(type, name)| name if valid_input_type?(type) }.compact
+      end
+
+      def valid_input_type?(type)
+        [:req, :opt].include? type
       end
 
       def parameter_pairs(object)

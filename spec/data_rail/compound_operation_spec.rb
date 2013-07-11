@@ -98,30 +98,33 @@ module DataRail
 
       end
 
-      #context 'when using a block for an operation' do
-      #  class BlockOperation
-      #    include CompoundOperation
-      #
-      #    component :math do |a, b|
-      #      a + b
-      #    end
-      #  end
-      #
-      #  class BlockResult
-      #    include CompoundResult
-      #    component :a, :b, :math
-      #  end
-      #
-      #  let(:operation) { BlockOperation.new }
-      #  let(:result) { BlockResult.new(a: 3, b: 5) }
-      #  subject { result }
-      #  before do
-      #    operation.call(result)
-      #  end
-      #
-      #  its(:math) { should eq 8 }
-      #end
+    end
 
+    context 'when using a block for an operation' do
+      class BlockOperation
+        include CompoundOperation
+
+        component :math do |a, b|
+          a + b
+        end
+      end
+
+      let(:operation) { BlockOperation.new({}) }
+      let(:result) { Hashie::Mash.new(a: 3, b: 5) }
+      subject { result }
+
+      before do
+        operation.call(result)
+      end
+
+      its(:math) { should eq 8 }
+
+      context 'when a overriding the block' do
+        MATH = lambda { |a, b| a * b }
+        let(:operation) { BlockOperation.new(math: MATH) }
+
+        its(:math) { should eq 15 }
+      end
     end
 
   end

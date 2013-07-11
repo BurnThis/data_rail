@@ -3,11 +3,16 @@ module DataRail
 
     class ComponentAccessor
 
-      attr_reader :name, :options
+      attr_reader :name, :options, :default
 
-      def initialize(name, options = {})
+      def initialize(name, options = {}, &default)
         @name = name
         @options = options
+        @default = default
+      end
+
+      def has_default?
+        not default.nil?
       end
 
       def read(object, name)
