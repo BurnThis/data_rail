@@ -10,53 +10,18 @@ require_relative '../support/mock_operation'
 
 module DataRail
 
-  class SuccessOperation
-    def call
-      SuccessResult.new
-    end
-  end
-
-  class FailureOperation
-    def call
-      FailureResult.new
-    end
-  end
-
-  class SimulatedBookingResult
-    include CompoundResult
-
-    components :order, :charge, :roster
-  end
+  FailureOperation = lambda { FailureResult.new }
+  SuccessOperation = lambda { SuccessResult.new }
 
   class SimulatedBooking
     include CompoundOperation
-
-    components :order, :charge, :roster
+    components :order, :charge
   end
 
-  class SubtotalOperation
-    def call(prices)
-      prices.inject :+
-    end
-  end
-
-  class TaxOperation
-    def call(subtotal, tax_rate)
-      subtotal * tax_rate
-    end
-  end
-
-  class TipOperation
-    def call(subtotal, tip_rate)
-      subtotal * tip_rate
-    end
-  end
-
-  class TotalOperation
-    def call(subtotal, tax, tip)
-      subtotal + tax + tip
-    end
-  end
+  SubtotalOperation = lambda { |prices| prices.inject :+ }
+  TaxOperation = lambda { |subtotal, tax_rate| subtotal * tax_rate }
+  TipOperation = lambda { |subtotal, tip_rate| subtotal * tip_rate }
+  TotalOperation = lambda { |subtotal, tax, tip| subtotal + tax + tip }
 
   class BillOperation
     include CompoundOperation
@@ -64,44 +29,45 @@ module DataRail
     components :total, :tax, :tip, :subtotal
   end
 
+
   describe CompoundOperation do
 
-    let(:order) { SuccessOperation.new }
-    let(:charge) { SuccessOperation.new }
-    let(:roster) { SuccessOperation.new }
+    let(:order) { SuccessOperation }
+    let(:charge) { SuccessOperation }
 
-    let(:operation) { SimulatedBooking.new(order: order, charge: charge, roster: roster) }
+    let(:operation) { SimulatedBooking.new(order: order, charge: charge) }
 
-    let(:result) { SimulatedBookingResult.new }
+    let(:result) { Hashie::Mash.new }
     subject { result }
 
     before do
       operation.call(result)
     end
 
-    context 'when all operations are successful' do
-      it { should be_success }
+    context 'when all operations have been executed' do
+      its(:order) { should be_a_kind_of SuccessResult }
+      its(:charge) { should be_a_kind_of SuccessResult }
     end
 
     context 'when the charge operation is a failure' do
-      let(:charge) { FailureOperation.new }
+      let(:charge) { FailureOperation }
 
-      it { should_not be_success }
-      it { should_not be_executed }
+      its(:charge) { should be_a_kind_of FailureResult }
     end
 
     context 'with dependencies' do
-      let(:subtotal) { SubtotalOperation.new }
-      let(:tax) { TaxOperation.new }
-      let(:tip) { TipOperation.new }
-      let(:total) { TotalOperation.new }
+      let(:subtotal) { SubtotalOperation }
+      let(:tax) { TaxOperation }
+      let(:tip) { TipOperation }
+      let(:total) { TotalOperation }
 
       let(:operation) { BillOperation.new(subtotal: subtotal, tax: tax, tip: tip, total: total) }
       let(:result) { Hashie::Mash.new(prices: [50, 25, 25], tax_rate: 0.05, tip_rate: 0.15) }
 
+      its(:subtotal) { should eq 100 }
+      its(:tax) { should eq 5 }
+      its(:tip) { should eq 15 }
       its(:total) { should eq 120 }
-      it { should be_success }
-      it { should be_executed }
 
       context 'when a value with downstream dependencies changes' do
         let(:tax) { MockOperation.new [5, 100] }
@@ -111,26 +77,21 @@ module DataRail
           operation.call(result)
         end
 
+        its(:tax) { should eq 100 }
         its(:total) { should eq 215 }
       end
 
       context 'when an intermediate operation fails' do
         let(:tax) { MockOperation.new [FailureResult.new, 5] }
 
-        it { should_not be_success }
-        it { should_not be_executed }
-
-        it { should be_executed :tax }
-        # should execute all the operations in a phase
-        # it { should be_success :tip }
+        its(:subtotal) { should_not be_nil }
+        its(:tax) { should be_a_kind_of FailureResult }
+        its(:total) { should be_nil }
 
         context 'when the intermediate operation succeeds on the 2nd try' do
           before do
             operation.call(result)
           end
-
-          it { should be_success }
-          it { should be_executed }
 
           its(:total) { should eq 120 }
         end

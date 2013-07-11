@@ -16,25 +16,6 @@ module DataRail
       base.extend ClassMethods
     end
 
-    class Phase
-
-      attr_reader :operations
-
-      def initialize(operations)
-        @operations = operations
-      end
-
-      def call_on_result(result)
-        operations.map { |o| o.call_on_result(result) }
-      end
-    end
-
-    class NilInput
-      def self.new(object)
-        object
-      end
-    end
-
     module ClassMethods
 
       def component_accessor(name)
@@ -79,7 +60,6 @@ module DataRail
     end
 
     def call(result)
-      result = coerce_result(result)
       each_component do |component|
         next if successful_result?(result)
         component_result = component.call_on_result(result)
@@ -102,10 +82,6 @@ module DataRail
       required_components_for(component).each(&block)
     end
 
-    def input_class
-      @input_class || NilInput
-    end
-
     private
 
     def successful_result?(result)
@@ -114,23 +90,6 @@ module DataRail
       else
         true
       end
-    end
-
-    #def phases
-    #  strongly_connected_components.map { |components| Phase.new(components) }
-    #end
-
-    #def each_phase(&block)
-    #  phases.each(&block)
-    #end
-
-    def coerce_result(result)
-      result
-      #if result.kind_of? input_class
-      #  result
-      #else
-      #  input_class.new(result)
-      #end
     end
 
     def components_directly_dependent_on(component)

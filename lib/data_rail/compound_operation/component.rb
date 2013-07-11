@@ -39,11 +39,15 @@ module DataRail
       end
 
       def input_names
-        parameter_names(object, :call)
+        parameter_pairs(object).map { |(type, name)| name if type == :req }.compact
       end
 
-      def parameter_names(object, method)
-        object.method(method).parameters.map { |(_, name)| name }
+      def parameter_pairs(object)
+        if object.respond_to? :parameters
+          object.parameters
+        else
+          object.method(:call).parameters
+        end
       end
 
       def extract_attributes(object, attribute_names)
