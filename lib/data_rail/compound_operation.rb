@@ -75,7 +75,7 @@ module DataRail
     end
 
     def tsort_each_node(&block)
-      unsorted_cells.each(&block)
+      unordered_cells.each(&block)
     end
 
     def tsort_each_child(cell, &block)
@@ -105,7 +105,7 @@ module DataRail
     end
 
     def get_cell(name)
-      unsorted_cells.find { |c| c.name == name }
+      unordered_cells.find { |c| c.name == name }
     end
 
     def each_cell(&block)
@@ -116,8 +116,8 @@ module DataRail
       @cells ||= tsort
     end
 
-    def unsorted_cells
-      @unsorted_cells ||= cell_accessors.map { |d| new_cell_from_accessor(d) }
+    def unordered_cells
+      @unordered_cells ||= cell_accessors.map { |d| new_cell_from_accessor(d) }
     end
 
     def new_cell_from_accessor(accessor)
