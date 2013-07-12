@@ -15,7 +15,7 @@ module DataRail
 
   class SimulatedBooking
     include CompoundOperation
-    components :order, :charge
+    cells :order, :charge
   end
 
   SubtotalOperation = lambda { |prices| prices.inject :+ }
@@ -26,7 +26,7 @@ module DataRail
   class BillOperation
     include CompoundOperation
 
-    components :total, :tax, :tip, :subtotal
+    cells :total, :tax, :tip, :subtotal
   end
 
 
@@ -104,7 +104,7 @@ module DataRail
       class BlockOperation
         include CompoundOperation
 
-        component :math do |a, b|
+        cell :math do |a, b|
           a + b
         end
       end
@@ -127,7 +127,32 @@ module DataRail
       end
     end
 
+    context 'with dependencies and inputs' do
 
+      class FinalIncomeOperation
+        include CompoundOperation
+
+        cell(:high_tax_rate) { 0.4 }
+        cell(:low_tax_rate) { 0.2 }
+
+        cell(:final_income) { |income, tax| income - tax }
+
+        cell(:income) { 100 }
+        cell :tax, inputs: {:high_tax_rate => :tax_rate} do |income, tax_rate|
+          income * tax_rate
+        end
+      end
+
+      let(:operation) { FinalIncomeOperation.new }
+      let(:result) { Hashie::Mash.new }
+      subject { result }
+
+      before do
+        operation.call(result)
+      end
+
+      its(:final_income) { should eq 60 }
+    end
 
   end
 

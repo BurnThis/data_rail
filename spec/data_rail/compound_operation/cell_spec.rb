@@ -2,7 +2,7 @@ require 'data_rail/compound_operation/component'
 
 module DataRail::CompoundOperation
 
-  describe Component do
+  describe Cell do
 
     class Subtracter
       def call(a, b)
@@ -11,34 +11,34 @@ module DataRail::CompoundOperation
     end
 
     let(:options) { {} }
-    let(:underlying_component) { nil }
-    let(:component) { Component.new(underlying_component, 'myoperation', options) }
+    let(:underlying_cell) { nil }
+    let(:component) { Cell.new(underlying_cell, 'myoperation', options) }
     subject { component }
 
     context 'when creating from a lambda' do
-      let(:underlying_component) do
+      let(:underlying_cell) do
         lambda { |a, b| a + b }
       end
 
-      its(:required_component_names) { should eq [:a, :b] }
+      its(:required_cell_names) { should eq [:a, :b] }
     end
 
     context 'when creating from a proc' do
-      let(:underlying_component) do
+      let(:underlying_cell) do
         Proc.new { |a, b| a + b }
       end
 
-      its(:required_component_names) { should eq [:a, :b] }
+      its(:required_cell_names) { should eq [:a, :b] }
     end
 
     context 'when creating from a callable class' do
-      let(:underlying_component) { Subtracter.new }
+      let(:underlying_cell) { Subtracter.new }
 
-      its(:required_component_names) { should eq [:a, :b] }
+      its(:required_cell_names) { should eq [:a, :b] }
     end
 
     context 'when mapping components' do
-      let(:underlying_component) { Subtracter.new }
+      let(:underlying_cell) { Subtracter.new }
       let(:options) do
         {
             inputs:
@@ -48,7 +48,7 @@ module DataRail::CompoundOperation
         }
       end
 
-      its(:required_component_names) { should eq [:a, :discount] }
+      its(:required_cell_names) { should eq [:a, :discount] }
     end
 
   end

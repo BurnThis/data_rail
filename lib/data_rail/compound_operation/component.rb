@@ -1,31 +1,12 @@
 require 'delegate'
 
 require 'data_rail/compound_result/component'
+require 'data_rail/compound_operation/input_map'
 
 module DataRail
   module CompoundOperation
 
-    class InputMap
-
-      def initialize(inputs)
-        self.inputs = flip(inputs || {})
-      end
-
-      def [](name)
-        inputs.fetch(name) { name }
-      end
-
-      protected
-
-      attr_accessor :inputs
-
-      def flip(hash)
-        Hash[hash.map(&:reverse)]
-      end
-
-    end
-
-    class Component < SimpleDelegator
+    class Cell < SimpleDelegator
 
       attr_reader :object, :name
 
@@ -44,18 +25,16 @@ module DataRail
 
       def call_on_result(result)
         attributes = extract_attributes(result, input_names)
-        result_component = call(*attributes)
-        result.public_send "#{name}=", result_component
-
-        CompoundResult::Component.new(result_component, name)
+        cell_result = call(*attributes)
+        result.public_send "#{name}=", cell_result
       end
 
-      def requires?(component)
-        required_component_names.include? component.name
+      def requires?(cell)
+        required_cell_names.include? cell.name
       end
 
-      def required_component_names
-        [*input_names , *preceeding_component_names].uniq
+      def required_cell_names
+        [*input_names , *preceeding_cell_names].uniq
       end
 
       protected
@@ -64,7 +43,7 @@ module DataRail
 
       private
 
-      def preceeding_component_names
+      def preceeding_cell_names
         self.after
       end
 
@@ -93,7 +72,11 @@ module DataRail
       end
 
       def extract_attributes(object, attribute_names)
-        attribute_names.map { |field| object.public_send(field) }
+        attribute_names.map do |field|
+          result = object.public_send(field)
+          raise "#{field} is nil" if result.nil?
+          result
+        end
       end
 
     end

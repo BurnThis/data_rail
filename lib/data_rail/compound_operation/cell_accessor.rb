@@ -1,7 +1,7 @@
 module DataRail
   module CompoundOperation
 
-    class ComponentAccessor
+    class CellAccessor
 
       attr_reader :name, :options, :default
 
