@@ -1,7 +1,29 @@
+require 'delegate'
+
 require 'data_rail/compound_result/component'
 
 module DataRail
   module CompoundOperation
+
+    class InputMap
+
+      def initialize(inputs)
+        self.inputs = flip(inputs || {})
+      end
+
+      def [](name)
+        inputs.fetch(name) { name }
+      end
+
+      protected
+
+      attr_accessor :inputs
+
+      def flip(hash)
+        Hash[hash.map(&:reverse)]
+      end
+
+    end
 
     class Component < SimpleDelegator
 
@@ -10,8 +32,14 @@ module DataRail
       def initialize(object, name, options = {})
         @object = object
         @name = name.to_sym
-        @options = options
+        @after = options.fetch(:after) { [] }
+        @input_map = InputMap.new(options[:inputs])
+
         super(object)
+      end
+
+      def call(*args)
+        super
       end
 
       def call_on_result(result)
@@ -30,16 +58,26 @@ module DataRail
         [*input_names , *preceeding_component_names].uniq
       end
 
+      protected
+
+      attr_reader :input_map, :after
+
       private
 
-      attr_reader :options
-
       def preceeding_component_names
-        options.fetch(:after) { [] }
+        self.after
       end
 
       def input_names
+        transform_input_names base_input_names
+      end
+
+      def base_input_names
         parameter_pairs(object).map { |(type, name)| name if valid_input_type?(type) }.compact
+      end
+
+      def transform_input_names(input_names)
+        input_names.map { |name| input_map[name] }
       end
 
       def valid_input_type?(type)
