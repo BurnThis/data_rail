@@ -2,7 +2,7 @@ require 'tsort'
 require 'set'
 require 'delegate'
 
-require 'data_rail/compound_operation/component'
+require 'data_rail/compound_operation/cell'
 require 'data_rail/compound_operation/cell_accessor'
 
 require 'pry'
@@ -126,6 +126,8 @@ module DataRail
         Cell.new(underlying_component, accessor.name, accessor.options)
       elsif accessor.has_default?
         Cell.new(accessor.default, accessor.name, accessor.options)
+      else
+        MissingCell.new(accessor.name)
       end
     end
 

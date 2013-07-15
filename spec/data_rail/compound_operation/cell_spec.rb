@@ -1,4 +1,4 @@
-require 'data_rail/compound_operation/component'
+require 'data_rail/compound_operation/cell'
 
 module DataRail::CompoundOperation
 

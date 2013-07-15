@@ -2,6 +2,7 @@ require 'delegate'
 
 require 'data_rail/compound_result/component'
 require 'data_rail/compound_operation/input_map'
+require 'data_rail/compound_operation/missing_cell'
 
 module DataRail
   module CompoundOperation
@@ -42,6 +43,10 @@ module DataRail
       attr_reader :input_map, :after
 
       private
+
+      def missing?
+        false
+      end
 
       def preceeding_cell_names
         self.after
