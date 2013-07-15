@@ -46,7 +46,7 @@ module DataRail
 
     it 'should raise a MissingCell exception when a cell is missing' do
       op = SimulatedBooking.new(charge: charge)
-      expect { op.call(result) }.to raise_error(CellMissingError, /order.+missing/)
+      expect { op.call(result) }.to raise_error(CellMissingError, /missing.+order/i)
     end
 
     context 'when all operations have been executed' do

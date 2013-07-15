@@ -60,8 +60,10 @@ module DataRail
     end
 
     def call(result)
+      check_for_missing_cells!
+
       each_cell do |cell|
-        next if successful_result?(result)
+        next if successful_result? result.public_send(cell.name)
         cell_result = cell.call_on_result(result)
 
         cells_directly_dependent_on(cell).each do |neighboring_cell|
@@ -84,11 +86,16 @@ module DataRail
 
     private
 
+    SUPPORTS_SUCCESS = lambda { |object| object.respond_to? :success? }
+
     def successful_result?(result)
-      if result.respond_to? :success?
-        result.success?
-      else
-        true
+      case result
+        when SUPPORTS_SUCCESS
+          result.success?
+        when nil
+          false
+        else
+          true
       end
     end
 
@@ -114,6 +121,22 @@ module DataRail
 
     def cells
       @cells ||= tsort
+    end
+
+    def check_for_missing_cells!
+      raise CellMissingError, "Missing cells: #{missing_cell_names.join(', ')}" if missing_cells?
+    end
+
+    def missing_cells?
+      !missing_cells.empty?
+    end
+
+    def missing_cells
+      cells.select &:missing?
+    end
+
+    def missing_cell_names
+      missing_cells.map &:name
     end
 
     def unordered_cells

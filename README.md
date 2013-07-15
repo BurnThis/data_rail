@@ -27,3 +27,10 @@ Coming soon
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Roadmap
+
+- More error checking for things like missing cells, parameter name mismatch, etc
+- Allow parallel execution of results in phases
+- Allow background queuing and processing
+- Integrate a pipeline architecture for more flexible processing

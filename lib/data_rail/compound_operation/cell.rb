@@ -38,15 +38,15 @@ module DataRail
         [*input_names , *preceeding_cell_names].uniq
       end
 
+      def missing?
+        false
+      end
+
       protected
 
       attr_reader :input_map, :after
 
       private
-
-      def missing?
-        false
-      end
 
       def preceeding_cell_names
         self.after
