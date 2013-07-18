@@ -79,9 +79,13 @@ module DataRail
       def extract_attributes(object, attribute_names)
         attribute_names.map do |field|
           result = object.public_send(field)
-          raise "#{field} is nil" if result.nil?
+          raise "Tried to compute :#{name} from #{format_attribute_names attribute_names} but :#{field} was nil" if result.nil?
           result
         end
+      end
+
+      def format_attribute_names(names)
+        '[' + names.map(&:inspect).join(', ') + ']'
       end
 
     end
