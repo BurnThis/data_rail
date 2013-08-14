@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/coderly/data_rail.png)](https://codeclimate.com/github/coderly/data_rail)
+
 # DataRail
 
 Coming soon
