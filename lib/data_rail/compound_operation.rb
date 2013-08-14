@@ -5,8 +5,6 @@ require 'delegate'
 require 'data_rail/compound_operation/cell'
 require 'data_rail/compound_operation/cell_accessor'
 
-require 'pry'
-
 module DataRail
 
   module CompoundOperation
