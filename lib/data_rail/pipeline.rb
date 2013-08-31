@@ -40,7 +40,11 @@ module DataRail
     end
 
     def process(objects)
-      objects.lazy.map { |o| call(o) }
+      if block_given?
+        objects.each { |o| yield call o }
+      else
+        to_enum(:process, objects)
+      end
     end
 
     private
