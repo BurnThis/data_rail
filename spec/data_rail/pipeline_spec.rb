@@ -1,5 +1,4 @@
 require 'data_rail/pipeline'
-require 'pry'
 
 module DataRail
   describe Pipeline do
