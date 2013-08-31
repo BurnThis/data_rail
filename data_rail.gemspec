@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "data_rail"
   spec.version       = DataRail::VERSION
   spec.authors       = ["Venkat Dinavahi"]
-  spec.email         = ["venkat@letsfunnel.com"]
+  spec.email         = ["venkat@coderly.com"]
   spec.description   = %q{DataRail provides a record importer and compound operations for operations like booking.}
   spec.summary       = %q{DataRail provides a set of tools that makes importing and computing data a breeze.}
   spec.homepage      = "http://www.letsfunnel.com"
@@ -19,9 +19,11 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "virtus"
+  spec.add_dependency "hashie"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
+  spec.add_development_dependency "rspec", ">= 2.0"
 
   spec.required_ruby_version = '>= 2.0'
 end

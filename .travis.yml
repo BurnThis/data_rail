@@ -1,7 +1,4 @@
 language: ruby
-script: "bundle exec rake ci"
+script: "bundle exec rake --trace"
 rvm:
-  - 1.9.3
   - 2.0.0
-  - rbx-19mode
-  - ruby-head
