@@ -17,6 +17,8 @@ module DataRail
         record = corresponding_record(object)
         attributes = attributes_for_object(object)
         assign_supported_attributes(record, attributes)
+
+        record
       end
 
       private
