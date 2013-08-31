@@ -1,5 +1,3 @@
-require 'pry'
-
 require 'spec_helper'
 
 require 'data_rail/operation/update_record'
