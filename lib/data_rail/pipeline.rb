@@ -43,8 +43,10 @@ module DataRail
       if block_given?
         objects.each { |o| yield call o }
       else
-        to_enum(:process, objects)
+        objects.each { |o| call o }
       end
+
+      nil
     end
 
     private

@@ -9,6 +9,7 @@ module DataRail
 
       def call(record)
         new_record = record.new_record?
+
         record.save
 
         if new_record
@@ -16,6 +17,8 @@ module DataRail
         else
           record_action 'UPDATED', record
         end
+
+        record
       end
 
       private

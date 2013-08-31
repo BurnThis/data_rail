@@ -40,7 +40,7 @@ module DataRail
     end
 
     describe 'process' do
-      let(:result) { pipeline.process ['orange', 'banana'] }
+      let(:result) { pipeline.to_enum :process, ['orange', 'banana'] }
       subject { result }
       its(:to_a) { should eq ['<[orange]>', '<[banana]>'] }
     end
@@ -64,7 +64,7 @@ module DataRail
       end
 
       describe 'process' do
-        let(:result) { pipeline.process ['monkey', 'giraffe'] }
+        let(:result) { pipeline.to_enum :process, ['monkey', 'giraffe'] }
         subject { result }
         its(:to_a) { should eq ['<[monkey]>', '<[giraffe]>'] }
       end

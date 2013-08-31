@@ -10,10 +10,11 @@ module DataRail
 
       let(:operation) { SaveRecord.new }
       let(:user) { User.create(ssn: '789', name: 'Jim', age: 32) }
+      let(:result) { @result }
 
       before do
         user.name = 'Gymnasium'
-        operation.call(user)
+        @result = operation.call(user)
       end
 
       describe 'user' do
@@ -21,6 +22,12 @@ module DataRail
 
         its(:name) { should eq 'Gymnasium' }
         it { should be_persisted }
+      end
+
+      describe 'result' do
+        subject { result }
+
+        it { should eq user }
       end
 
     end
