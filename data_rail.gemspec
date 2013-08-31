@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["venkat@coderly.com"]
   spec.description   = %q{DataRail provides a record importer and compound operations for operations like booking.}
   spec.summary       = %q{DataRail provides a set of tools that makes importing and computing data a breeze.}
-  spec.homepage      = "http://www.letsfunnel.com"
+  spec.homepage      = "http://www.coderly.com"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
@@ -24,6 +24,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec", ">= 2.0"
+  spec.add_development_dependency "activerecord", "~> 4.0.0"
+  spec.add_development_dependency "sqlite3"
 
   spec.required_ruby_version = '>= 2.0'
 end

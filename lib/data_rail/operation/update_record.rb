@@ -1,3 +1,5 @@
+require 'data_rail/object_hasher'
+
 module DataRail
   module Operation
 
@@ -38,7 +40,11 @@ module DataRail
         active_record.where(key: key_for_object(object)).first_or_initialize
       end
 
-      attr_reader :active_record, :logger
+      def key_for_object(object)
+        fields[:key].call(object)
+      end
+
+      attr_reader :active_record, :fields, :logger
 
     end
 
