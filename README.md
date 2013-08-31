@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/coderly/data_rail.png)](https://travis-ci.org/coderly/data_rail)
 [![Code Climate](https://codeclimate.com/github/coderly/data_rail.png)](https://codeclimate.com/github/coderly/data_rail)
 
 # DataRail
