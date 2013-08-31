@@ -1,7 +1,34 @@
 require 'logger'
 
 module DataRail
+
+  class PipelineBuilder
+
+    def initialize
+      @components = []
+    end
+
+    def build(logger = Logger.new(nil))
+      Pipeline.new(components, logger)
+    end
+
+    def use(component)
+      @components << component
+    end
+
+    private
+
+    attr_reader :components
+
+  end
+
   class Pipeline
+
+    def self.build(logger = Logger.new(nil), &block)
+      builder = PipelineBuilder.new
+      builder.instance_eval(&block)
+      builder.build(logger)
+    end
 
     def initialize(components, logger = Logger.new(nil))
       @components = components

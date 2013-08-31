@@ -54,5 +54,23 @@ module DataRail
       it { should have_message 'value=<[pear]>' }
     end
 
+    describe '.build' do
+
+      let(:pipeline) do
+        Pipeline.build(logger) do
+          use BRACKET
+          use ANGLES
+          use LOGGER
+        end
+      end
+
+      describe 'process' do
+        let(:result) { pipeline.process ['monkey', 'giraffe'] }
+        subject { result }
+        its(:to_a) { should eq ['<[monkey]>', '<[giraffe]>'] }
+      end
+
+    end
+
   end
 end
