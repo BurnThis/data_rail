@@ -10,7 +10,7 @@ module DataRail
         @logger = options.fetch(:logger) { Logger.new(nil) }
 
         @fields = options[:fields] || {}
-        @fields[:key] ||= ObjectHasher.new
+        @fields[:key] ||= lambda { |o| o.key }
       end
 
       def call(object)
