@@ -3,12 +3,14 @@ require 'spec_helper'
 require 'data_rail/operation/save_record'
 require 'hashie/mash'
 
+require 'logger'
+
 module DataRail
   module Operation
 
     describe SaveRecord do
 
-      let(:operation) { SaveRecord.new }
+      let(:operation) { SaveRecord.new(logger: Logger.new(nil)) }
       let(:user) { User.create(ssn: '789', name: 'Jim', age: 32) }
       let(:result) { @result }
 

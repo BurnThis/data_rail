@@ -31,7 +31,7 @@ module DataRail
     end
 
     def initialize(components, logger = Logger.new(nil))
-      @components = components
+      @components = Array(components)
       @logger = logger
     end
 
