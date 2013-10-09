@@ -114,16 +114,28 @@ module DataRail
     end
 
     module ClassMethods
+
       def field(name, type, options = {})
-        fields << Field.new(name, options)
+        class_field_map[name] = Field.new(name, options)
         class_eval do
           attribute name, type
         end
       end
 
-      def fields
-        @fields ||= []
+      def field_map
+        superclass_field_map.merge(class_field_map).freeze
       end
+
+      protected
+
+      def class_field_map
+        @field_map ||= {}
+      end
+
+      def superclass_field_map
+        superclass.respond_to?(:field_map) ? superclass.field_map : {}
+      end
+
     end
 
     def self.included(base)
@@ -134,7 +146,7 @@ module DataRail
     attr_reader :data_source
 
     def fields
-      self.class.fields
+      self.class.field_map.values
     end
 
     def initialize(source)

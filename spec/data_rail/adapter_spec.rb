@@ -1,6 +1,7 @@
 require 'data_rail/adapter'
 
 module DataRail
+
   class TestAdapter
     include Virtus
     include Adapter
@@ -19,7 +20,13 @@ module DataRail
 
   end
 
+  class TestSubAdapter < TestAdapter
+    field :price, Float, :from => 'charge.amount_in_cents', :process => lambda { |price| price + 10 }
+    field :new_field, String, :from => 'test_field'
+  end
+
   describe Adapter do
+
     context 'when creating a new class' do
       let(:data_source) do
         {
@@ -29,7 +36,8 @@ module DataRail
           :address => {zip_code: '21108'},
           :charge => double(type: 'stripe', amount_in_cents: 2350),
           :test => {'name' => 'abc'},
-          :unstripped => '  abc def '
+          :unstripped => '  abc def ',
+          :test_field => 'here is a test field'
         }
       end
 
@@ -44,6 +52,17 @@ module DataRail
 
       its(:stripthis) { should eq 'abc def' }
       its(:newid) { should eq 8 }
+
+      it { should_not respond_to :new_field }
+
+      describe 'subadapter' do
+        let(:sub_adapter) { TestSubAdapter.new(data_source) }
+        subject { sub_adapter }
+
+        its(:zip) { should eq '21108' }
+        its(:new_field) { should eq 'here is a test field' }
+        its(:price) { should eq 2360 }
+      end
 
     end
 
