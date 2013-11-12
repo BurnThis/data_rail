@@ -32,6 +32,11 @@ module DataRail
         it { should eq user }
       end
 
+      it 'should raise an error when the user isnt valid' do
+        user.name = nil
+        expect { operation.call(user) }.to raise_error(ActiveRecord::RecordInvalid)
+      end
+
     end
 
   end

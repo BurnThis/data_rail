@@ -10,7 +10,7 @@ module DataRail
       def call(record)
         new_record = record.new_record?
 
-        record.save
+        record.save!
 
         if new_record
           record_action 'CREATED', record
