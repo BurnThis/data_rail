@@ -85,7 +85,8 @@ This operation is provided by DataRail out of the box. It saves a record and log
 - Records must have a key column. This column must be a string and have a unique constraint on it. The key column is what determines the identity of a record.
 - Key columns are a primary key because data from external sources should have a consistent unique id.
 - A suggested convention for keys to prefix data with its source. For example `facebook:photo:32395` or `instagram:photo:4zd3f3af`
-- You must pass in a hash of the field mappings to be applied to the database records. Take a look at the example above. Values in this hash can be customized with callbacks. For example, take a look at the country field.
+- You must pass in a hash of the field mappings to be applied to the database records. 
+- Values in this hash can be customized with callbacks. For example, take a look at the country field in the example.
 
 ### DataRail::ObjectHasher
 This object calculates a unique key for an object such as facebook:photo:32395. 
