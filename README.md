@@ -54,7 +54,7 @@ end
 
 ## Importing data
 
-``DataRail::Pipeline`` is most commonly used from importing data into the database. You may have a step for normalizing fields, tagging records, and inserting it into the database. 
+``DataRail::Pipeline`` is most commonly used from importing data into the database. You could have a step for normalizing fields, tagging records, and inserting it into the database. 
 
 
 First an example:
@@ -63,7 +63,7 @@ First an example:
 hasher = DataRail::ObjectHasher.new(business.key)
 logger = Logger.new(STDOUT)
 
-DataRail::Pipeline.build do
+pipeline = DataRail::Pipeline.build do
   use DataRail::Operation::UpdateRecord.new(BurnThis::Studio,
                                             fields: {
                                               key: hasher,
