@@ -101,7 +101,77 @@ If business 25 and business 97 both each have a studio with an id of 1, then we 
 
 ### DataRail::Adapter
 
+The Adapter in DataRail is a mixin that makes it easy to wrap objects for purposes of normalizing data. For example, if you are pulling in business information from different APIs, you will have an easier time writing your code if you normalize all data sources to provide objects with the same fields and in the same formats. This offers two major advantages:
+
+- Extensibility. Adding more sources is mostly a matter of creating adapters for new sources. Think of power adapters. If you import an electrical device from anotehr country, you can buy a small travel adapter for each country. These adapters "normalize" the interface of these devices.
+- Resilience to change. If the APIs change their data formats (renames fields, changes time formats, etc), you will only need to modify the adapters implementation.
+
 It is recommended that a pipeline is used in conjunction with an adapter when importing data. If you find yourself sprinkling a lot of data processing code in your pipeline builder, you are probably doing something wrong.
+
+#### Basic Example
+
+```ruby
+require 'data_rail/adapter'
+
+class StudioAdapter
+    # Including Virtus is currently a requirement before including the adapter
+    # There are plans to remove this requirement
+    include Virtus
+    include DataRail::Adapter
+    
+    field :source, Symbol
+    field :source_key, String, from: :ID
+    field :description, String, from: :BusinessDescription, process: [:strip]
+    
+    # You can call into nested properties
+    field :latitude, Float, from: 'Location.Latitude'
+    field :longitude, Float, from: 'Location.Longitude'
+    
+    # if you want to add extra attributes, you override attributes
+    # attributes is used by the DataRail UpdateRecord operation
+    def attributes
+      super.merge(data_source: data_source)
+    end
+    
+    # You can override the source attribute
+    # Instead of coming from the data_source, it will come from this method
+    def source
+      :yelp_studio
+    end
+    
+end
+```
+
+You could use this adapter like so (contrived example):
+```ruby
+raw_studio_data = {ID: 'axb4', BusinessDescription: ' We are a yoga studio        ', location: {longitude: '76.98', latitude: 67.98}}
+normalized_studio = StudioAdapter.new(raw_studio_data)
+
+normalized_studio.source # => :yelp_studio
+normalized_studio.source_key # => 'axb4'
+normalized_studio.description # => 'We are a yoga studio'
+normalized_studio.latitude # => 76.98
+normalized_studio.longitude # => 67.98
+```
+
+If you created an adapter for a studio from different data source, you would want to design it so it has the same interface as the above studio.
+
+#### Defining New Processors
+To define additional processing such (like `process: [:strip]` in the example), you must define a processor in the `DataRail::Processor` namespace. For example:
+
+```ruby
+module DataRail
+  module Processor
+    class DollarsToCents
+      def call(dollars)
+        (dollars.to_f * 100).to_i if dollars.respond_to?(:to_f)
+      end
+    end
+  end
+end
+```
+
+This will allow you to use `:dollars_to_cents` in your process options.
 
 ## Roadmap
 
