@@ -139,7 +139,7 @@ module DataRail
     end
 
     def self.included(base)
-      base.send :include, Virtus
+      base.send :include, Virtus.model
       base.extend ClassMethods
     end
 

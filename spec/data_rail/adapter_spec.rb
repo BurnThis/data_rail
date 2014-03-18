@@ -3,7 +3,7 @@ require 'data_rail/adapter'
 module DataRail
 
   class TestAdapter
-    include Virtus
+    include Virtus.model
     include Adapter
 
     field :id, Integer, :from => :id
